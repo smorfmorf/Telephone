@@ -126,7 +126,7 @@
     `
     );
 
-    const buttons = createButtonsGroup([
+    const buttonsGroup = createButtonsGroup([
       {
         className: "btn btn-primary mr-3",
         type: "submit",
@@ -139,7 +139,7 @@
       },
     ]);
 
-    form.append(...buttons.btns);
+    form.append(...buttonsGroup.btns);
 
     overlay.append(form);
 
@@ -148,6 +148,43 @@
       form,
     };
   }
+
+  const render = (app, title) => {
+    console.log("app: ", app);
+
+    const header = createHeader();
+    const logo = createLogo(title);
+    const main = createMain();
+    const footer = createFooter();
+    const buttonsGroup = createButtonsGroup([
+      {
+        className: "btn btn-primary mr-3",
+        type: "button",
+        text: "Добавить",
+      },
+      {
+        className: "btn btn-danger",
+        type: "button",
+        text: "Удалить",
+      },
+    ]);
+    console.log("buttonsGroup: ", buttonsGroup);
+    const table = createTable();
+    const form = createForm();
+
+    header.headerContainer.append(logo);
+    main.mainContainer.append(buttonsGroup.btnWrapper, table, form.overlay);
+
+    app.append(header, main, footer);
+
+    return {
+      list: table.tbody,
+      logo,
+      btnAdd: buttonsGroup.btns[0],
+      form: form.form,
+      formOverlay: form.overlay,
+    };
+  };
 
   function createRow({ name, surname, phone }) {
     const tr = document.createElement("tr");
@@ -164,7 +201,8 @@
     const tdPhone = document.createElement("td");
     const phoneLink = document.createElement("a");
     phoneLink.href = `tel:${phone}`;
-    phoneLink.textContent = `${phone}`;
+    phoneLink.textContent = phone;
+    tr.phoneLink = phoneLink;
 
     tdPhone.append(phoneLink);
 
@@ -185,50 +223,59 @@
   function renderContacts(el, data) {
     const allRow = data.map(createRow);
     el.append(...allRow);
+    return allRow;
   }
 
-  const render = (app, title) => {
-    console.log("app: ", app);
+  function hoverRow(allRow, logo) {
+    const text = logo.textContent;
+    allRow.forEach((contact) => {
+      contact.addEventListener("mouseenter", () => {
+        console.log("mouseEnter", contact);
+        logo.textContent = contact.phoneLink.textContent;
+      });
+      contact.addEventListener("mouseleave", () => {
+        console.log("mouseleave", contact);
+        logo.textContent = text;
+      });
+    });
+  }
 
-    const header = createHeader();
-    const logo = createLogo(title);
-    const main = createMain();
-    const footer = createFooter();
-    const buttons = createButtonsGroup([
-      {
-        className: "btn btn-primary mr-3",
-        type: "button",
-        text: "Добавить",
-      },
-      {
-        className: "btn btn-danger",
-        type: "button",
-        text: "Удалить",
-      },
-    ]);
-
-    const table = createTable();
-    const form = createForm();
-
-    header.headerContainer.append(logo);
-    main.mainContainer.append(buttons.btnWrapper, table, form.overlay);
-
-    app.append(header, main, footer);
-
-    return {
-      list: table.tbody,
-    };
-  };
+  function bublingCapturing() {}
 
   const init = (selectorApp, title) => {
     const app = document.querySelector(selectorApp);
     const phoneBook = render(app, title);
 
     //tbody
-    const { list } = phoneBook;
+    const { list, logo, btnAdd, formOverlay, form } = phoneBook;
 
-    renderContacts(list, data);
+    formOverlay.addEventListener("click", () => {
+      formOverlay.classList.remove("is-visible");
+    });
+    //заблокировать всплытие
+    form.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+    //stopPropagation - останавливает всплытие, но дает всем обработчикам доработать которые есть на текущем элементе. (а второй метод не дает выполнить больше ни 1 обработчику)
+
+    //функционал
+    const allRow = renderContacts(list, data);
+    hoverRow(allRow, logo);
+
+    btnAdd.addEventListener("click", () => {
+      formOverlay.classList.add("is-visible");
+    });
+
+    // когда произойдет загрзка приложения, сформируется верстка вызывается наша функция.
+    bublingCapturing();
   };
 
   window.phoneBookInit = init;
 }
+
+// если у нас есть несколько вложеных элементов на каждом из которых клик
+// и если выполнить клик на области внешнего эл не затрагивая внутрених то обработчик выполнится не затрагивая внутрених
+
+// если кликнуть на конпку добавить то события сработают на всех элементов которые идут от этой кнопки до его родителя
+
+// события будут срабатывать не как они написаны а от того элемента на который нажали и вверх - но на самом деле событие проходит сквозь дерева начиная  от корня(а не от элемента) до самого глубокого эл на котором событие сработало а затем в обратном направлении.
