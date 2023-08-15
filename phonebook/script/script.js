@@ -265,6 +265,10 @@
     btnAdd.addEventListener("click", () => {
       formOverlay.classList.add("is-visible");
     });
+    const close = document.querySelector(".close");
+    close.addEventListener("click", () => {
+      formOverlay.classList.remove("is-visible");
+    });
 
     // когда произойдет загрзка приложения, сформируется верстка вызывается наша функция.
     bublingCapturing();
