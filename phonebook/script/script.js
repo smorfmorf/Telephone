@@ -181,6 +181,7 @@
       list: table.tbody,
       logo,
       btnAdd: buttonsGroup.btns[0],
+      btnDel: buttonsGroup.btns[1],
       form: form.form,
       formOverlay: form.overlay,
     };
@@ -188,6 +189,7 @@
 
   function createRow({ name, surname, phone }) {
     const tr = document.createElement("tr");
+    tr.classList.add("contact");
     const tdDel = document.createElement("td");
     tdDel.classList.add("delete");
     const buttonDel = document.createElement("button");
@@ -240,23 +242,19 @@
     });
   }
 
-  function bublingCapturing() {}
-
   const init = (selectorApp, title) => {
     const app = document.querySelector(selectorApp);
     const phoneBook = render(app, title);
 
     //tbody
-    const { list, logo, btnAdd, formOverlay, form } = phoneBook;
+    const { list, logo, btnAdd, formOverlay, form, btnDel } = phoneBook;
 
-    formOverlay.addEventListener("click", () => {
-      formOverlay.classList.remove("is-visible");
+    formOverlay.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target === formOverlay || target.closest(".close")) {
+        formOverlay.classList.remove("is-visible");
+      }
     });
-    //заблокировать всплытие
-    form.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-    //stopPropagation - останавливает всплытие, но дает всем обработчикам доработать которые есть на текущем элементе. (а второй метод не дает выполнить больше ни 1 обработчику)
 
     //функционал
     const allRow = renderContacts(list, data);
@@ -265,21 +263,34 @@
     btnAdd.addEventListener("click", () => {
       formOverlay.classList.add("is-visible");
     });
-    const close = document.querySelector(".close");
-    close.addEventListener("click", () => {
-      formOverlay.classList.remove("is-visible");
+    // const close = document.querySelector(".close");
+    // close.addEventListener("click", () => {
+    //   formOverlay.classList.remove("is-visible");
+    // });
+
+    btnDel.addEventListener("click", () => {
+      document.querySelectorAll(".delete").forEach((del) => {
+        del.classList.toggle("is-visible");
+      });
     });
 
-    // когда произойдет загрзка приложения, сформируется верстка вызывается наша функция.
-    bublingCapturing();
-  };
+    list.addEventListener("click", (event) => {
+      console.log(event.target);
+      const target = event.target;
+      if (target.classList.contains("del-icon")) {
+        target.closest(".contact").remove();
+      }
+    });
 
+    setTimeout(() => {
+      const contact = createRow({
+        name: "Иван",
+        surname: "Петров",
+        phone: "+79514545454",
+      });
+      //вставляем строчку tr в tbody(list)
+      list.append(contact);
+    }, 2000);
+  };
   window.phoneBookInit = init;
 }
-
-// если у нас есть несколько вложеных элементов на каждом из которых клик
-// и если выполнить клик на области внешнего эл не затрагивая внутрених то обработчик выполнится не затрагивая внутрених
-
-// если кликнуть на конпку добавить то события сработают на всех элементов которые идут от этой кнопки до его родителя
-
-// события будут срабатывать не как они написаны а от того элемента на который нажали и вверх - но на самом деле событие проходит сквозь дерева начиная  от корня(а не от элемента) до самого глубокого эл на котором событие сработало а затем в обратном направлении.
