@@ -298,7 +298,13 @@
       console.log(event.target);
       const target = event.target;
       if (target.classList.contains("del-icon")) {
-        target.closest(".contact").remove();
+        // target.closest(".contact").remove();
+        const contact = target.closest(".contact");
+        const phone = contact.phoneLink.textContent;
+        console.log("phone: ", phone);
+        contact.remove();
+        //!removeStorage
+        removeStorage("phoneBook", phone); // Удаляем контакт из LocalStoragetorage
       }
     });
   }
@@ -315,10 +321,30 @@
       const newContact = Object.fromEntries(formData);
 
       addContactData(newContact);
+      //!setlocal
+      setStorage("phoneBook", newContact); // Добавляем контакт в LocalStorage
       addContactPage(newContact, list);
       form.reset();
       closeModel();
     });
+  }
+
+  function getStorage(key) {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
+  }
+
+  function setStorage(key, object) {
+    const data = getStorage(key);
+    data.push(object);
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  function removeStorage(key, phone) {
+    const data = getStorage(key);
+    console.log("data: ", data);
+    const newData = data.filter((contact) => contact.phone !== phone);
+    localStorage.setItem(key, JSON.stringify(newData));
   }
 
   //Функция инициализации приложения
@@ -331,21 +357,23 @@
     const { list, logo, btnAdd, formOverlay, form, btnDel } = phoneBook;
 
     //!функционал
-    const allRow = renderContacts(list, data);
+    const allRow = renderContacts(list, getStorage("phoneBook"));
+    // const allRow = renderContacts(list, data); без localstorage
+
     hoverRow(allRow, logo);
     const { closeModel } = modalControl(btnAdd, formOverlay);
     deleteControl(btnDel, list);
     formControl(form, list, closeModel);
 
-    setTimeout(() => {
-      const contact = createRow({
-        name: "Иван",
-        surname: "Петров",
-        phone: "+79514545454",
-      });
-      //вставляем строчку tr в tbody(list)
-      list.append(contact);
-    }, 2000);
+    // setTimeout(() => {
+    //   const contact = createRow({
+    //     name: "Иван",
+    //     surname: "Петров",
+    //     phone: "+79514545454",
+    //   });
+    //   //вставляем строчку tr в tbody(list)
+    //   list.append(contact);
+    // }, 2000);
   };
   window.phoneBookInit = init;
 }
