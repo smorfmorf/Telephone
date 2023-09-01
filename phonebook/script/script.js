@@ -4,7 +4,7 @@ const { hoverRow, modalControl, deleteControl, formControl } = control;
 import apprender from "./modules/render.js";
 const { render, renderContacts } = apprender;
 
-import { getStorage } from "./modules/serviceStorage.js";
+import * as storage from "./modules/serviceStorage.js";
 
 export const phoneBookModule = {
   //* createElements start
@@ -33,7 +33,7 @@ export const phoneBookModule = {
     const { list, logo, btnAdd, formOverlay, form, btnDel } = phoneBook;
 
     //!функционал
-    const allRow = renderContacts(list, getStorage("phoneBook"));
+    const allRow = renderContacts(list, storage.getStorage("phoneBook"));
     // const allRow = renderContacts(list, data); без localstorage
 
     hoverRow(allRow, logo);
