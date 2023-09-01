@@ -17,10 +17,11 @@
     />
     <link rel="stylesheet" href="phonebook/css/style.css" />
 
-    <script defer src="phonebook/script/script.js"></script>
-    <script>
+    <script type="module">
+      import { phoneBookModule } from "./phonebook/script/script.js";
+
       document.addEventListener("DOMContentLoaded", () => {
-        phoneBookInit("#app", "Book");
+        phoneBookModule.init("#app", "Book");
       });
     </script>
   </head>
